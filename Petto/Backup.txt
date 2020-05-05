@@ -1,0 +1,320 @@
+import * as React from 'react';
+import { Platform, StyleSheet, Text, View, 
+  TouchableHighlight, TextInput, Image, Alert,
+  ScrollView, Dimensions, ActivityIndicator, Button, TouchableOpacity, Picker } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import firebase from './firebase_config';
+import DetailsScreen from './src/navigation'
+
+
+
+class SignupLogin extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      username: '',
+      password: '',
+      confirmPassword: '',
+      showLogin: true,
+    };
+  }
+
+  toggleShowLogin() {
+    this.setState({
+      showLogin: true
+    })
+  }
+
+  toggleShowSignup() {
+    this.setState({
+      showLogin: false
+    })
+  }
+
+  doLogin() {
+    firebase.auth().signInWithEmailAndPassword(this.state.username, this.state.password).then( () => {
+      console.log("login successful");
+    })
+    .catch(function(error) {
+      // Handle Errors here.
+      console.log(error.code);
+      console.log(error.message);
+      alert(error.message);
+      // ...
+    })
+  }
+
+  doSignup() {
+    // https://firebase.google.com/docs/auth/web/start
+
+    // check if the two password fields match
+    const password = this.state.password;
+    const confirmPassword = this.state.confirmPassword;
+    if (password === confirmPassword){
+      // do signup
+      firebase.auth().createUserWithEmailAndPassword(this.state.username, this.state.password).then( () => {
+        console.log("created new user successful");
+        this.toggleShowLogin(); // show login page
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        console.log(error.code);
+        console.log(error.message);
+        alert(error.message);
+      });
+    }
+    else {
+      alert("Password do not match !!!");
+    }
+  }
+
+  showSignup() {
+    return (
+      <View>
+        <View style={styles.group}>
+          <Text style={styles.title}>Username</Text>
+          <TextInput style={styles.input}
+            value={this.state.username}
+            onChangeText={(username) => this.setState({username})}/>
+        </View>
+        <View style={styles.group}>
+          <Text style={styles.title}>Password</Text>
+          <TextInput style={styles.input}
+            secureTextEntry={true}
+            value={this.state.password}
+            onChangeText={(password) => this.setState({password})}
+            />
+        </View>
+        <View style={styles.group}>
+          <Text style={styles.title}>Confirm Password</Text>
+          <TextInput style={styles.input}
+            secureTextEntry={true}
+            value={this.state.confirmPassword}
+            onChangeText={(confirmPassword) => this.setState({confirmPassword})}
+            />
+        </View>
+        <View style={styles.center}>
+          <View style={styles.group}>
+            <TouchableOpacity onPress={() => {this.toggleShowLogin();}}>
+              <Text style={styles.signupText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.group}>
+            <TouchableOpacity style={styles.button}
+              onPress={() => {this.doSignup()}}>
+              <Text style={styles.buttonText}>Signup</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  showLogin() {
+    return (
+      <View>
+        <View style={styles.group}>
+          <Text style={styles.title}>Username</Text>
+          <TextInput style={styles.input}
+            value={this.state.username}
+            onChangeText={(username) => this.setState({username})}/>
+        </View>
+        <View style={styles.group}>
+          <Text style={styles.title}>Password</Text>
+          <TextInput style={styles.input}
+            secureTextEntry={true}
+            value={this.state.password}
+            onChangeText={(password) => this.setState({password})}
+            />
+        </View>
+        <View style={styles.center}>
+          <View style={styles.group}>
+            <TouchableOpacity onPress={() => {this.toggleShowSignup();}}>
+              <Text style={styles.signupText}>Signup</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.group}>
+            <TouchableOpacity style={styles.button}
+              onPress={() => {this.doLogin()}}>
+              <Text style={styles.buttonText}>Login</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  render() {
+    if (this.state.isLoggedIn){
+      return  <NavigationContainer> 
+                <Stack.Screen name="Details" component={DetailsScreen} />
+              </NavigationContainer>
+    }
+    else{
+      return (
+        <View style={styles.containerLogin}>
+            {!this.state.isLoggedIn? (this.state.showLogin ? this.showLogin() : this.showSignup()):null}
+        </View>
+      );
+    }
+  }
+}
+
+class HomeScreen extends React.Component {
+}
+
+
+function DetailsScreen({ navigation }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Details Screen</Text>
+      <Button
+        title="Go to Details... again"
+        onPress={() => navigation.navigate('Details')}
+      />
+       <Button
+        title="Go to SignupLogin"
+        onPress={() => navigation.navigate('SignupLogin')}
+      />
+      <Button
+        title="Go to EntrustScreen"
+        onPress={() => navigation.navigate('EntrustScreen')}
+      />
+       <Button
+        title="Go to ConfirmScreen"
+        onPress={() => navigation.navigate('ConfirmScreen')}
+      />
+    </View>
+  );
+}
+
+
+function EntrustScreen({ navigation }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Details Screen</Text>
+      <Button
+        title="Go to Details... again"
+        onPress={() => navigation.navigate('Details')}
+      />
+    </View>
+  );
+}
+function ConfirmScreen({ navigation }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Text>Details Screen</Text>
+      <Button
+        title="Go to Details... again"
+        onPress={() => navigation.navigate('Details')}
+      />
+    </View>
+  );
+}
+
+//Drawer
+  //LogOut
+    //MyEntrust
+    //NextPet
+
+const Stack = createStackNavigator();
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="SignupLogin">
+        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+        <Stack.Screen name="Details" component={DetailsScreen} />
+        <Stack.Screen name="SignupLogin" component={SignupLogin} />
+        <Stack.Screen name="EntrustScreen" component={EntrustScreen} />
+        <Stack.Screen name="ConfirmScreen" component={ConfirmScreen} />
+      
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default App;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    padding: 20
+  },
+  title: {
+    fontSize: 20,
+    padding: 10
+  },
+  searchArea: {
+    flexDirection: "row",
+    padding: 10,
+    backgroundColor: '#E5E4E3',
+    borderRadius: 10,
+    alignItems: 'center'
+  },
+  restaurantContainer: {
+    padding: 5,
+    margin: 10,
+    backgroundColor: '#E5E4E3',
+    width: 350,
+    flex:1
+  },
+  restaurant: {
+    padding: 5,
+    margin: 5,
+    backgroundColor: '#FFFFFF',
+  },
+  food_img: {
+    width: 100,
+    height: 100,
+    margin: 3
+  },
+  star_img : {
+    width: 120,
+    height:30,
+    margin: 3
+  },
+  star_container : {
+    padding: 5,
+    margin: 5,
+    flexDirection : "row",
+    backgroundColor: '#FFFFFF',
+    alignItems: "center"
+  },
+  containerLogin: {
+    flex: 1,
+    justifyContent: 'center',
+    flexDirection: 'column',
+    padding: 20
+  },
+  group: {
+    marginTop: 20
+  },
+  button: {
+    backgroundColor: 'lightblue',
+    padding: 20,
+    borderWidth: 1
+  },
+  buttonText: {
+    fontSize: 30
+  },
+  input: {
+    padding: 10,
+    height: 40,
+    borderWidth: 1
+  },
+  title: {
+    fontSize: 20
+  },
+  center: {
+    alignItems: 'center'
+  },
+  signupText : {
+    fontSize: 20,
+    color: 'blue'
+  }
+});
